@@ -28,8 +28,8 @@ public class RoomController {
     }
 
     @PutMapping("/room/clean/{id}")
-    public ResponseEntity clean(@PathVariable int id, @RequestBody int nfcTag ){
-        return  service.cleanRoom(id, nfcTag);
+    public ResponseEntity clean(@PathVariable int id){
+        return  service.cleanRoom(id);
     }
 
 

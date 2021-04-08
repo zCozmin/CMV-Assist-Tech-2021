@@ -79,7 +79,8 @@ public class UserService {
         System.out.println(repository.count());
         if (repository.count() == 0)
             return new ResponseEntity<>("There are no users yet.", HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(repository.findAll(), HttpStatus.OK);
+
+        return new ResponseEntity<>(repository.findAllByRoleId(2), HttpStatus.OK);
     }
 
     public ResponseEntity getUserById(int id) {
@@ -120,8 +121,8 @@ public class UserService {
         return new ResponseEntity<>("Can't find user with id <" + id + ">.", HttpStatus.BAD_REQUEST);
     }
 
-    private List<String> getAllEmails() {
-        List<User> allUsers = repository.findAll();
+    private List<String> getAllEmails(int id) {
+        List<User> allUsers = repository.findAllByRoleId(id);
         List<String> allEmails = new ArrayList<>();
         for (User user : allUsers)
             allEmails.add(user.getEmail());
@@ -129,9 +130,9 @@ public class UserService {
         return allEmails;
     }
 
-    public ResponseEntity sendEmailToAllUsers(String message, String body) {
-        sendEmailService.sendEmail(getAllEmails().toArray(new String[0]), body, message);
-        return new ResponseEntity<>(getAllEmails(), HttpStatus.OK);
+    public ResponseEntity sendEmailToAllUsers(String message, String body, int id) {
+        sendEmailService.sendEmail(getAllEmails(id).toArray(new String[0]), body, message);
+        return new ResponseEntity<>(getAllEmails(id), HttpStatus.OK);
     }
 
 

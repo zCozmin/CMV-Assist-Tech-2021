@@ -10,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -22,6 +21,7 @@ public class Reservation {
     @Id
     @GeneratedValue
     private int id;
+
     private LocalDate startDate;
     private LocalDate endDate;
     private int userId;

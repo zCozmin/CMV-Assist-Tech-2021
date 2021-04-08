@@ -1,5 +1,6 @@
 package assist.cmv.CMV.controller;
 
+import assist.cmv.CMV.model.EmailSender;
 import assist.cmv.CMV.model.User;
 import assist.cmv.CMV.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,6 @@ public class UserController {
 
     @PostMapping("/user/addUser")
     public ResponseEntity addUser(@RequestBody User user) {
-
-
-
         String pwd = user.getPassword();
         String encryptPassword = encoder.encode(pwd);
         user.setPassword(encryptPassword);
@@ -44,8 +42,6 @@ public class UserController {
 
     @PostMapping("/user/{id}/lock")
     public ResponseEntity lock(@RequestBody int nfcRequest, @PathVariable int id, @RequestHeader("Token") String token){
-        System.out.println(token);
-        System.out.println(id+ "  nfc" +nfcRequest);
         return service.lock(id,nfcRequest);
     }
 
@@ -74,8 +70,8 @@ public class UserController {
         return service.deleteUser(id);
     }
 
-    @GetMapping("/users/emails")
-    public ResponseEntity sendEmails(String body, String message) {
-        return service.sendEmailToAllUsers(body, message);
+    @PostMapping("/user/email")
+    public ResponseEntity sendEmails(@RequestBody EmailSender emailSender) {
+        return service.sendEmailToAllUsers(emailSender.getTitle(),emailSender.getMessage(),emailSender.getId());
     }
 }

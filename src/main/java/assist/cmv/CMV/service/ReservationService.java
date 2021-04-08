@@ -89,13 +89,12 @@ public class ReservationService {
         List<Reservation> lst = reservationRepository.findAll();
         if (lst.size() != 0) {
             for (Reservation r : lst) {
-                if (r.getEndDate().isAfter(localDate) && !r.getStatus().equals("check-out")) {
+                if (localDate.isAfter(r.getEndDate()) && !r.getStatus().equals("check-out")) {
                     r.setStatus("auto check-out");
                     r.setAnnulled(true);
                     reservationRepository.save(r);
                 }
             }
-
             return new ResponseEntity<>(reservationRepository.findAll(), HttpStatus.OK);
         }
         else
@@ -164,14 +163,16 @@ public class ReservationService {
         if (existingReservation != null) {
             LocalDate start = existingReservation.getStartDate();
             LocalDate end = existingReservation.getEndDate();
-
             if (localDate.isEqual(end) || localDate.isAfter(end) || localDate.isBefore(start))
                 return new ResponseEntity<>("Could not perform check-in!", HttpStatus.BAD_REQUEST);
             if (existingReservation.getStatus().equals("check-in"))
                 return new ResponseEntity<>("Check-in already performed!", HttpStatus.BAD_REQUEST);
             if (existingReservation.getStatus().equals("check-out"))
                 return new ResponseEntity<>("Check-out has been performed!", HttpStatus.BAD_REQUEST);
+        }else{
+            return new ResponseEntity<>("Reservation with id <" + id + " does not exist.", HttpStatus.BAD_REQUEST);
         }
+
         existingReservation.setStatus("check-in");
         reservationRepository.save(existingReservation);
         return new ResponseEntity<>("Check-in performed!", HttpStatus.OK);
@@ -179,7 +180,7 @@ public class ReservationService {
 
     public ResponseEntity performCheckOut(int id) {
         Reservation exReservation = reservationRepository.findById(id).orElse(null);
-        if (!exReservation.getStatus().equals("check-in") || !exReservation.getStatus().equals("locked") || !exReservation.getStatus().equals("unlocked"))
+        if (!(exReservation.getStatus().equals("check-in") || exReservation.getStatus().equals("locked") || exReservation.getStatus().equals("unlocked")))
             return new ResponseEntity<>("You need to perform check-in first!", HttpStatus.BAD_REQUEST);
         if (localDate.isAfter(exReservation.getEndDate()))
             return new ResponseEntity<>("Reservation expired!", HttpStatus.BAD_REQUEST);
@@ -201,7 +202,6 @@ public class ReservationService {
             List<Reservation> allReservations = reservationRepository.findAll();
             for (Reservation reservation : allReservations) {
                 Room room = roomRepository.findById(reservation.getRoomNumber()).orElse(null);
-                if (room != null) {
                     if (reservation.getUserId() == id && room.getNfcTag() == nfcTag) {
                         ok = true;
                         LocalDate start = reservation.getStartDate();
@@ -224,7 +224,7 @@ public class ReservationService {
                             return new ResponseEntity<>("Check-in performed!", HttpStatus.OK);
                         }
                     }
-                } else return new ResponseEntity<>("Room on reservation no longer exists.", HttpStatus.BAD_REQUEST);
+
             }
         } else
             return new ResponseEntity<>("User with id <" + id + "> not found.", HttpStatus.BAD_REQUEST);
@@ -241,7 +241,7 @@ public class ReservationService {
             for (Reservation reservation : allReservations) {
                 ok = true;
                 Room room = roomRepository.findById(reservation.getRoomNumber()).orElse(null);
-                if (room != null) {
+
                     if (reservation.getUserId() == id && room.getNfcTag() == nfcTag) {
                         if (reservation.getStatus().equals("new") || reservation.getStatus().equals("unlocked")) {
                             ok = false;
@@ -265,8 +265,7 @@ public class ReservationService {
                             return new ResponseEntity<>("Check-out performed!", HttpStatus.OK);
                         }
                     }
-                } else
-                    return new ResponseEntity<>("Room on reservation no longer exists.", HttpStatus.BAD_REQUEST);
+
             }
         } else
             return new ResponseEntity<>("User with id <" + id + "> not found.", HttpStatus.BAD_REQUEST);

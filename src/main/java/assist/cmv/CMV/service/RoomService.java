@@ -30,12 +30,10 @@ public class RoomService {
         Optional<Room> optionalRoom = Optional.ofNullable(room);
         String response = "";
         if (optionalRoom.isPresent()) {
-
-            //TODO la update nu se modifica id
             if (repository.existsById(room.getId()) && repository.countById(room.getId()) > 1)
                 response += "Room with id <" + room.getId() + "> already exists.\n";
-            if (repository.existsRoomByNfcTag(room.getNfcTag()) && repository.countByNfcTag(room.getNfcTag()) > 0)
-                response += "Two rooms can't have the same NFCTag (" + room.getNfcTag() + ").\n";
+//            if (repository.existsRoomByNfcTag(room.getNfcTag()) && repository.countByNfcTag(room.getNfcTag()) > 0)
+//                response += "Two rooms can't have the same NFCTag (" + room.getNfcTag() + ").\n";
             if (room.getRating() == 0)
                 response += "";
             else if (room.getRating() < 1 || room.getRating() > 5)
@@ -151,21 +149,17 @@ public class RoomService {
         return new ResponseEntity<>("Something went wrong", HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity cleanRoom(int id, int nfcTag) {
-        if(userRepository.existsById(id)){
-            List<Reservation> reservations= reservationRepository.findAll();
-            for(Reservation r : reservations){
-                if(r.getUserId()==id){
-                    Room room= repository.getOne(r.getRoomNumber());
-                    if(room.getNfcTag()==nfcTag){
-                        room.setCleaned(true);
-			repository.save(room);
-                        return new ResponseEntity("Cleaned succesful!", HttpStatus.OK);
-                    }
-                }
-            }
+    public ResponseEntity cleanRoom(int id) {
+        Room room = repository.findById(id).orElse(null);
+        if(room!=null) {
+            if(room.getCleaned()==false) {
+                room.setCleaned(true);
+                repository.save(room);
+                return new ResponseEntity<>("Room cleaned", HttpStatus.OK);
+            }}
+        else
+            return new ResponseEntity<>("Room not found", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Bad request", HttpStatus.BAD_REQUEST);
 
-        }
-        return new ResponseEntity("Bad request", HttpStatus.BAD_REQUEST);
     }
 }

@@ -6,6 +6,7 @@ import assist.cmv.CMV.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -19,6 +20,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT u FROM User u where u.name=?1")
     User findUserByName(String name);
+
+    @Query("SELECT u FROM User u where u.roleId=?1")
+    List<User> findAllByRoleId(int id);
 
     int countById(int id);
 
